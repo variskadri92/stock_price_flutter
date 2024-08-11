@@ -4,7 +4,7 @@ import '../models/global_quote.dart';
 
 class ApiService {
   final String _baseUrl = 'https://api.twelvedata.com';
-  final String _apiKey = '96d4fdf7bb2245429dee572a5064fe3f';
+  final String _apiKey = '527e668da5164066af5ff2e7e6aa5696';
 
   Future<GlobalQuote?> fetchStockQuote(String symbol) async {
     final url = Uri.parse('$_baseUrl/quote?symbol=$symbol&apikey=$_apiKey');
@@ -16,10 +16,8 @@ class ApiService {
         final Map<String, dynamic> json = jsonDecode(response.body);
 
         if (json.containsKey('symbol')) {
-          print(json);
           return GlobalQuote.fromMap(json);
         } else {
-          // Handle the case where the API returns an error or unexpected data
           print('Error fetching data: ${json['message']}');
           return null;
         }

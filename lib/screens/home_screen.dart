@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:stock_price_app/models/search_symbol.dart';
-import 'package:stock_price_app/screens/stock_data.dart';
+import 'package:stock_price_app/screens/search_stock_data.dart';
 import 'package:stock_price_app/widgets/popular_tile.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'aapl',
     'ibm',
     'ba',
+
   ];
   List<Datum> retrieveItems = [];
 
@@ -53,21 +55,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String currentDateTime = DateFormat('d MMMM, hh:mm a').format(DateTime.now());  // Format current date and time
     return Scaffold(
-      backgroundColor: Colors.deepPurple[100],
+      backgroundColor: Colors.grey[500],
       body: Stack(
         children: [
           CustomScrollView(
             slivers: [
               SliverAppBar(
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: Colors.grey.shade800,
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('S T O C K  Q U O T E',
+                    const Text('S T O C K   Q U O T E',
                         style: TextStyle(color: Colors.white, fontSize: 24)),
-                    Text('8 August',
-                        style: TextStyle(color: Colors.white, fontSize: 16)),
+                    Text(currentDateTime,
+                        style: const TextStyle(color: Colors.white, fontSize: 16)),
                   ],
                 ),
                 expandedHeight: 180,
@@ -79,35 +82,42 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 90),
+                        const SizedBox(height: 90),
                         TextField(
                           onChanged: (value) async {
-                            await _fetchSearch(value);
+
+                            if (value.isEmpty) {
+                              setState(() {
+                                retrieveItems = [];
+                              });
+                            } else {
+                              await _fetchSearch(value);
+                            }
                           },
                           decoration: InputDecoration(
                             hintText: 'Enter stock symbol',
-                            hintStyle: TextStyle(color: Colors.grey[400]),
+                            hintStyle: TextStyle(color: Colors.grey[600]),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
                               borderSide: BorderSide.none,
                             ),
                             filled: true,
-                            fillColor: Colors.grey[200],
+                            fillColor: Colors.grey[00],
                             prefixIcon:
                             Icon(Icons.search, color: Colors.grey[600]),
-                            contentPadding: EdgeInsets.symmetric(
+                            contentPadding: const EdgeInsets.symmetric(
                                 vertical: 14, horizontal: 20),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(color: Colors.transparent),
+                              borderSide: const BorderSide(color: Colors.transparent),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
                               borderSide:
-                              BorderSide(color: Colors.deepPurpleAccent),
+                              BorderSide(color: Colors.grey.shade100),
                             ),
                           ),
-                          style: TextStyle(color: Colors.black, fontSize: 16),
+                          style: const TextStyle(color: Colors.black, fontSize: 16),
                         ),
                       ],
                     ),
@@ -128,26 +138,26 @@ class _HomeScreenState extends State<HomeScreen> {
           if(retrieveItems.isNotEmpty)
             Positioned(
               top: 170,
-              left: 20,
-              right: 20,
+              left: 25,
+              right: 25,
               child: Container(
                 constraints: BoxConstraints(
               maxHeight: MediaQuery.sizeOf(context).height * 0.32, // Constrain the height
     ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: ListView.builder(
                     itemCount: retrieveItems.length,
                     shrinkWrap: true,
-                    physics: BouncingScrollPhysics(),
+                    physics: const BouncingScrollPhysics(),
                     itemBuilder: (context, index) {
                       Datum item = retrieveItems[index];
                       return ListTile(
                         title: Text(item.symbol),
                         subtitle: Text(item.instrumentName),
-                        onTap: () => Get.to(() => StockData(symbol: item.symbol)),
+                        onTap: () => Get.to(() => SearchStockData(symbol: item.symbol)),
                       );
                     }),
               ),

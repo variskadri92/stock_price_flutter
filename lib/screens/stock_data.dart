@@ -1,117 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-import 'package:stock_price_app/services/api_service.dart';
-
+import '../controller/watchlist_controller.dart';
 import '../models/global_quote.dart';
 
-class StockData extends StatefulWidget {
-  const StockData({super.key, required this.symbol});
+class StockData extends StatelessWidget {
+  const StockData({
+    super.key,
+    required this.symbol,
+    required this.quote,
+    required this.price,
+  });
 
   final String symbol;
-
-  @override
-  State<StockData> createState() => _StockDataState();
-}
-
-class _StockDataState extends State<StockData> {
-
-   final WatchlistController watchlistController = Get.find();
-  final ApiService fetchStockData = ApiService();
-  late Future<GlobalQuote?> _futureQuote;
-  late Future<double?> price;
-
-  @override
-  void initState() {
-    super.initState();
-    _futureQuote = fetchStockData.fetchStockQuote(widget.symbol);
-    price = fetchStockData.fetchStockPrice(widget.symbol);
-  }
+  final GlobalQuote? quote;
+  final double? price;
 
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: Future.wait([
-        _futureQuote,
-        price,
-      ]),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data == null) {
-          return Center(child: Text('No data available'));
-        }
+    final WatchlistController watchlistController = Get.find();
 
-        final quote = snapshot.data![0] as GlobalQuote?;
-        final priceValue = snapshot.data![1] as double?;
+    final displayPrice = price?.toStringAsFixed(2) ?? 'N/A';
 
-        // Handle cases where price or quote might be null
-        final displayPrice = priceValue?.toStringAsFixed(2) ?? 'N/A';
-        final change = double.tryParse(quote?.change ?? '0.0') ?? 0.0;
-        final percentChange = double.tryParse(quote?.percentChange ?? '0.0') ?? 0.0;
-
-
-        return Scaffold(
-          backgroundColor: Colors.deepPurple[100],
-          appBar: AppBar(
-            title: const Text("S T O C K  D A T A"),
-            backgroundColor: Colors.deepPurple,
-            actions: [
-              IconButton(onPressed: (){
-              watchlistController.addSymbol(widget.symbol);
-              print(watchlistController.watchlistSymbol);
-              }, icon: Icon(Icons.add))
-            ],
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                 quote?.name ?? 'N/A',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple[800],
+    return Scaffold(
+      backgroundColor: Colors.grey.shade500,
+      appBar: AppBar(
+        title: const Text("S T O C K  D A T A",style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.grey.shade800,
+        actions: [
+          IconButton(
+            onPressed: () {
+              watchlistController.addSymbol(symbol);
+              var snackBar = SnackBar(
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.grey.shade500,
+                elevation: 0,
+                content: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.grey.shade800,
+                      borderRadius: BorderRadius.circular(12)
+                  ),
+                  child: const Padding(
+                    padding:  EdgeInsets.all(16),
+                    child: Text('Stock Added to Watchlist'),
                   ),
                 ),
-                const SizedBox(height: 20),
-                Center(
+              );
+
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            },
+            icon: const Icon(Icons.add,color: Colors.white,),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                quote?.name ?? 'N/A',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: Material(
+                  borderRadius: BorderRadius.circular(20),
+                  elevation: 10,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
                       height: 400,
                       padding: const EdgeInsets.all(20),
-                      color: Colors.deepPurple[200],
+                      color: Colors.grey.shade600,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          buildStockInfoRow("Current Price", displayPrice),
-                          buildStockInfoRow("Percentage Change",  quote?.percentChange ?? 'N/A'),
-                          buildStockInfoRow("Prev Close",  quote?.previousClose ?? 'N/A'),
-                          buildStockInfoRow("Open",  quote?.open ?? 'N/A'),
-                          buildStockInfoRow("High",  quote?.high ?? 'N/A'),
-                          buildStockInfoRow("Low", quote?.low ?? 'N/A'),
-                          buildStockInfoRow("Volume", quote?.volume ?? 'N/A'),
+                          stockDataRow("Current Price", displayPrice),
+                          stockDataRow("Percentage Change", quote?.percentChange ?? 'N/A'),
+                          stockDataRow("Prev Close", quote?.previousClose ?? 'N/A'),
+                          stockDataRow("Open", quote?.open ?? 'N/A'),
+                          stockDataRow("High", quote?.high ?? 'N/A'),
+                          stockDataRow("Low", quote?.low ?? 'N/A'),
+                          stockDataRow("Volume", quote?.volume ?? 'N/A'),
                         ],
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      }
+        ),
+      ),
     );
   }
 
-  Widget buildStockInfoRow(String label, String value) {
+  Widget stockDataRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -134,19 +125,4 @@ class _StockDataState extends State<StockData> {
     );
   }
 }
-
-class WatchlistController extends GetxController {
-  var watchlistSymbol = <String>[].obs;
-
-  void addSymbol(String symbol) {
-    if (!watchlistSymbol.contains(symbol)) {
-      watchlistSymbol.add(symbol);
-    }
-  }
-
-  void removeSymbol(String symbol) {
-    watchlistSymbol.remove(symbol);
-  }
-}
-
 

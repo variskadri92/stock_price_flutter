@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:stock_price_app/screens/stock_data.dart';
 
+import '../controller/watchlist_controller.dart';
 import '../widgets/popular_tile.dart';
 
 class WatchlistScreen extends StatelessWidget {
-  WatchlistScreen({super.key});
+  const WatchlistScreen({super.key});
 
-  final WatchlistController watchlistController = Get.find();
 
   @override
   Widget build(BuildContext context) {
+    final WatchlistController watchlistController = Get.find();
+
     return Scaffold(
-      backgroundColor: Colors.deepPurple[100],
+      backgroundColor: Colors.grey.shade500,
 
       appBar: AppBar(
-        title: const Text("Wishlist"),
-        backgroundColor: Colors.deepPurple,
+        title: const Text("Wishlist",style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.grey.shade800,
+
       ),
       body: Obx(() {
         if (watchlistController.watchlistSymbol.isEmpty) {
-          return Center(child: Text('No symbols in wishlist.'));
+          return const Center(child: Text('No symbols in wishlist.'));
         } else {
           return ListView.builder(
             itemCount: watchlistController.watchlistSymbol.length,

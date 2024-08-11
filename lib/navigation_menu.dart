@@ -12,8 +12,8 @@ class NavigationMenu extends StatefulWidget {
 
 class _NavigationMenuState extends State<NavigationMenu> {
   List screens = [
-    HomeScreen(),
-    WatchlistScreen(),
+    const HomeScreen(),
+    const WatchlistScreen(),
   ];
   int _selectedIndex = 0;
   @override
@@ -22,11 +22,11 @@ class _NavigationMenuState extends State<NavigationMenu> {
       bottomNavigationBar: CurvedNavigationBar(
         index: _selectedIndex,
         height: 60,
-        color: Colors.deepPurple.shade50,
-        backgroundColor: Colors.deepPurple.shade100,
-        items: [
+        color: Colors.grey.shade50,
+        backgroundColor: Colors.grey.shade500,
+        items: const [
           Icon(Icons.home),
-          Icon(Icons.heart_broken),
+          Icon(Icons.favorite),
         ],
         onTap: (index){
           setState(() {
