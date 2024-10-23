@@ -24,6 +24,7 @@ class _PopularTileState extends State<PopularTile> {
   late Future<GlobalQuote?> _futureQuote;
   late Future<double?> price;
 
+  final WatchlistController watchlistController = Get.find();
 
 
   @override
@@ -35,8 +36,6 @@ class _PopularTileState extends State<PopularTile> {
 
   @override
   Widget build(BuildContext context) {
-    final WatchlistController watchlistController = Get.find();
-
     return FutureBuilder<List<dynamic>>(
       future: Future.wait([
         _futureQuote,
